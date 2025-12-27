@@ -6,13 +6,24 @@ Imports System.Security.Principal
 Imports Microsoft.Win32
 
 ' OP2Mapper2Helper
+' https://github.com/leviathan400/OP2Mapper2Helper
 '
-' A helper tool that registers all required VB6 COM libraries for OP2Mapper2, shows their current registration locations, and launches the mapper.
+' A helper tool that registers all required VB6 COM libraries for OP2Mapper2,
+' shows their current registration locations, and launches the mapper.
+'
+' Outpost 2: Divided Destiny is a real-time strategy video game released in 1997.
+
 Public Class fMain
 
-    Public Version As String = "0.2.0"
+    Public ApplicationName As String = "OP2Mapper2Helper"
+    Public ApplicatioVersion As String = "0.3.0"
+    Public ApplicatioBuild As String = "0015"
+    Public ApplicationDescription As String = "Tool that registers required COM libraries For OP2Mapper2 and shows their registration locations."
+    Public ApplicationWebsite As String = "https//github.com/leviathan400/OP2Mapper2Helper"
 
     Public WindowsOSVersion As String = "Unknown"
+
+    Public Mapper2Path As String = IO.Path.Combine(Application.StartupPath, "Mapper2.exe")
 
     Private MapperFiles As String() = {
         "cPopMenu6.ocx",
@@ -24,13 +35,18 @@ Public Class fMain
     }
 
     Private Sub fMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.Icon = My.Resources.Mapper2_Icon
+        Me.Icon = My.Resources.Mapper2_Icon_256
         Me.Text = "OP2Mapper2 Helper"
 
-        AppendToConsole("Detected OS: " & GetRealWindowsVersion())
-        'AppendToConsole("WindowsOSVersion Short Code: " & WindowsOSVersion)
+        GetRealWindowsVersion() ' Set WindowsOSVersion
+        'AppendToConsole("Detected OS " & GetRealWindowsVersion())
+        AppendToConsole("Windows OS: " & WindowsOSVersion)
 
         ShowAdminStatus()
+
+        CheckFileExists(Mapper2Path)
+
+        DisplayFileVersion(Mapper2Path)
 
         AppendToConsole("")
 
@@ -44,18 +60,27 @@ Public Class fMain
         txtConsole.ScrollToCaret()
     End Sub
 
-    Private Function GetWindowsVersion() As String '
-        ' Example: AppendToConsole("Detected OS: " & GetWindowsVersion())
+    Public Sub CheckFileExists(filename As String)
+        Dim filePath As String = IO.Path.Combine(Application.StartupPath, filename)
 
+        If IO.File.Exists(filePath) Then
+            'AppendToConsole(filename & " present")
+        Else
+            AppendToConsole(IO.Path.GetFileName(filename) & " Not found In folder!")
+        End If
+    End Sub
+
+    Private Function GetWindowsVersion() As String '
+        ' Example: AppendToConsole("Detected OS " & GetWindowsVersion())
         Try
-            Dim searcher As New ManagementObjectSearcher("SELECT Caption, Version FROM Win32_OperatingSystem")
+            Dim searcher As New ManagementObjectSearcher("Select Caption, Version FROM Win32_OperatingSystem")
             For Each os As ManagementObject In searcher.Get()
                 Dim caption = os("Caption").ToString().Trim()
                 Dim version = os("Version").ToString().Trim()
                 Return $"{caption} (Version {version})"
             Next
         Catch ex As Exception
-            Return "Unable to detect OS: " & ex.Message
+            Return "Unable To detect OS " & ex.Message
         End Try
 
         Return "Unknown Windows Version"
@@ -64,7 +89,7 @@ Public Class fMain
     Private Function GetRealWindowsVersion() As String
         Try
             Dim searcher As New System.Management.ManagementObjectSearcher(
-            "SELECT Caption, Version FROM Win32_OperatingSystem")
+            "Select Caption, Version FROM Win32_OperatingSystem")
 
             For Each os As System.Management.ManagementObject In searcher.Get()
                 Dim caption As String = os("Caption").ToString().Trim()
@@ -72,21 +97,24 @@ Public Class fMain
                 Dim lowerCaption As String = caption.ToLowerInvariant()
 
                 If lowerCaption.Contains("windows 11") Then
-                    WindowsOSVersion = "Win11"
+                    WindowsOSVersion = "Windows 11"
                 ElseIf lowerCaption.Contains("windows 10") Then
-                    WindowsOSVersion = "Win10"
+                    WindowsOSVersion = "Windows 10"
                 ElseIf lowerCaption.Contains("windows 8.1") Then
-                    WindowsOSVersion = "Win8.1"
+                    WindowsOSVersion = "Windows 8.1"
                 ElseIf lowerCaption.Contains("windows 8") Then
-                    WindowsOSVersion = "Win8"
+                    WindowsOSVersion = "Windows 8"
                 ElseIf lowerCaption.Contains("windows 7") Then
-                    WindowsOSVersion = "Win7"
+                    WindowsOSVersion = "Windows 7"
                 ElseIf lowerCaption.Contains("vista") Then
-                    WindowsOSVersion = "Vista"
+                    WindowsOSVersion = "Windows Vista"
                 ElseIf lowerCaption.Contains("xp") Then
-                    WindowsOSVersion = "XP"
+                    WindowsOSVersion = "Windows XP"
                 ElseIf lowerCaption.Contains("server") Then
-                    WindowsOSVersion = "WinServer"
+                    WindowsOSVersion = "Windows Server"
+                    If lowerCaption.Contains("server 2022") Then
+                        WindowsOSVersion = "Windows Server 2022"
+                    End If
                 Else
                     WindowsOSVersion = "Unknown"
                 End If
@@ -96,7 +124,7 @@ Public Class fMain
 
         Catch ex As Exception
             WindowsOSVersion = "Unknown"
-            Return "Unable to detect OS: " & ex.Message
+            Return "Unable To detect OS " & ex.Message
         End Try
 
         WindowsOSVersion = "Unknown"
@@ -105,9 +133,9 @@ Public Class fMain
 
     Private Sub ShowAdminStatus()
         If IsRunningAsAdministrator() Then
-            AppendToConsole("Running as Administrator: Yes")
+            AppendToConsole("Running As Administrator Yes")
         Else
-            AppendToConsole("Running as Administrator: No")
+            AppendToConsole("Running As Administrator No")
         End If
     End Sub
 
@@ -120,7 +148,6 @@ Public Class fMain
             Return False
         End Try
     End Function
-
 
     Public Function FindRegisteredComDll(target As String) As List(Of String)
         Dim results As New List(Of String)()
@@ -154,6 +181,17 @@ Public Class fMain
         Return results.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
     End Function
 
+    Public Sub DisplayFileVersion(filePath As String)
+        Try
+            Dim versionInfo As FileVersionInfo = FileVersionInfo.GetVersionInfo(filePath)
+
+            AppendToConsole($"OP2Mapper2 Version {versionInfo.FileMajorPart}.{versionInfo.FileMinorPart}.{versionInfo.FilePrivatePart}")
+
+        Catch ex As Exception
+            Console.WriteLine("Error " & ex.Message)
+        End Try
+    End Sub
+
     Public Function GetDllVersion(dllPath As String) As String
         Try
             Dim info = FileVersionInfo.GetVersionInfo(dllPath)
@@ -171,9 +209,9 @@ Public Class fMain
         Dim paths = FindRegisteredComDll(ComName)
 
         If paths.Count = 0 Then
-            AppendToConsole(ComName & " not registered.")
+            AppendToConsole(ComName & " Not registered.")
         Else
-            AppendToConsole("Found " & ComName & " registration:")
+            AppendToConsole("Found " & ComName & " registration")
             For Each p In paths
                 AppendToConsole("" & p)
                 'AppendToConsole(GetDllVersion(p))
@@ -195,11 +233,10 @@ Public Class fMain
 
     Private Sub RegisterComLibrary(fileName As String)
         ' Helper to register one COM library with regsvr32
-
         Dim fullPath As String = Path.Combine(Application.StartupPath, fileName)
 
         If Not File.Exists(fullPath) Then
-            AppendToConsole("   ERROR: " & fileName & " not found in " & Application.StartupPath)
+            AppendToConsole("   Error " & fileName & " Not found In " & Application.StartupPath)
             Return
         End If
 
@@ -207,9 +244,10 @@ Public Class fMain
             Dim p As New Process()
             p.StartInfo.FileName = "regsvr32.exe"
             p.StartInfo.Arguments = "/s """ & fullPath & """"
-            p.StartInfo.UseShellExecute = True   ' no redirection, just run it
-            ' If you want to force UAC prompt for this app instead of requiring
-            ' "Run as administrator", uncomment the next line:
+            p.StartInfo.UseShellExecute = True   ' No redirection, just run it
+
+            ' Force UAC prompt for this app instead of requiring
+            ' "Run As administrator", uncomment the next line:
             ' p.StartInfo.Verb = "runas"
 
             p.Start()
@@ -218,11 +256,11 @@ Public Class fMain
             If p.ExitCode = 0 Then
                 AppendToConsole("   OK")
             Else
-                AppendToConsole("   regsvr32 exit code: " & p.ExitCode)
+                AppendToConsole("   regsvr32 Exit code " & p.ExitCode)
             End If
 
         Catch ex As Exception
-            AppendToConsole("   ERROR: " & ex.Message)
+            AppendToConsole("   Error " & ex.Message)
         End Try
     End Sub
     Private Sub btnRegisterLibraries_Click(sender As Object, e As EventArgs) Handles btnRegisterLibraries.Click
@@ -231,12 +269,12 @@ Public Class fMain
         AppendToConsole("--------------------------------------------")
         AppendToConsole(" OP2Mapper2 Installation")
         AppendToConsole("--------------------------------------------")
-        AppendToConsole("Welcome to the installer for OP2Mapper2")
-        AppendToConsole("You may need to be logged on as a system administrator")
-        AppendToConsole("if you are on Windows NT, 2000, or XP.")
+        AppendToConsole("Welcome To the installer For OP2Mapper2")
+        AppendToConsole("You may need To be logged On As a system administrator")
+        AppendToConsole("If you are On Windows NT, 2000, Or XP.")
         AppendToConsole("The installation may still succeed without being an administrator,")
-        AppendToConsole("however, if you get errors on run, you will need to install again")
-        AppendToConsole("as an administrator.")
+        AppendToConsole("however, If you Get errors On run, you will need To install again")
+        AppendToConsole("As an administrator.")
         AppendToConsole("")
         'AppendToConsole("---------------------------")
         'AppendToConsole(" Running install script...")
@@ -244,25 +282,20 @@ Public Class fMain
 
         AppendToConsole("Registering cPopMenu6.ocx...")
         RegisterComLibrary("cPopMenu6.ocx")
-
         AppendToConsole("Registering OP2Editor.dll...")
         RegisterComLibrary("OP2Editor.dll")
-
         AppendToConsole("Registering SSubTmr6.dll...")
         RegisterComLibrary("SSubTmr6.dll")
-
         AppendToConsole("Registering vbalDTab6.ocx...")
         RegisterComLibrary("vbalDTab6.ocx")
-
         AppendToConsole("Registering vbalTbar6.ocx...")
         RegisterComLibrary("vbalTbar6.ocx")
-
         AppendToConsole("Registering vbalTreeView6.ocx...")
         RegisterComLibrary("vbalTreeView6.ocx")
 
-        AppendToConsole("---------------------------")
-        AppendToConsole(" Finishing installation...")
-        AppendToConsole("---------------------------")
+        'AppendToConsole("---------------------------")
+        'AppendToConsole(" Finishing installation...")
+        'AppendToConsole("---------------------------")
         AppendToConsole("")
         AppendToConsole("Click 'Run Mapper' when you’re ready.")
         AppendToConsole("")
@@ -270,13 +303,14 @@ Public Class fMain
         EnableButtons()
     End Sub
 
-
     Private Sub btnShowLibraries_Click(sender As Object, e As EventArgs) Handles btnShowLibraries.Click
         DisableButtons()
 
         'FindCOMRegistration("OP2Editor")
 
         ShowLibrariesMapper()
+
+        AppendToConsole("")
 
         ShowLibrariesSystem()
 
@@ -292,7 +326,7 @@ Public Class fMain
             FindCOMRegistration(LibraryFile)
             LibraryFileCount = LibraryFileCount + 1
         Next
-        AppendToConsole(LibraryFileCount & " COM Library Files Checked")
+        'AppendToConsole(LibraryFileCount & " COM Library Files Checked")
     End Sub
 
     Private Sub ShowLibrariesSystem()
@@ -303,19 +337,31 @@ Public Class fMain
 
     Private Sub btnRunMapper_Click(sender As Object, e As EventArgs) Handles btnRunMapper.Click
         Try
-            Dim exe = Path.Combine(Application.StartupPath, "Mapper2.exe")
-
-            If Not File.Exists(exe) Then
+            If Not File.Exists(Mapper2Path) Then
+                AppendToConsole("")
                 AppendToConsole("Mapper2.exe not found in folder!")
                 Exit Sub
             End If
 
+            AppendToConsole("")
             AppendToConsole("Launching OP2Mapper2...")
-            Process.Start(exe)
+            Process.Start(Mapper2Path)
 
         Catch ex As Exception
             AppendToConsole("ERROR launching: " & ex.Message)
         End Try
+    End Sub
+
+    Private Sub btnAbout_Click(sender As Object, e As EventArgs) Handles btnAbout.Click
+        Using AboutForm As New fAbout()
+            AboutForm.ApplicationTitle = ApplicationName
+            AboutForm.ApplicationVersion = ApplicatioVersion
+            AboutForm.ApplicationBuild = ApplicatioBuild
+            AboutForm.ApplicationDescription = ApplicationDescription
+            AboutForm.ApplicationCopyright = "Outpost Universe © 2025"
+            AboutForm.ApplicationWebsite = ApplicationWebsite
+            AboutForm.ShowDialog(Me)
+        End Using
     End Sub
 
 End Class

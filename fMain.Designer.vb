@@ -26,6 +26,7 @@ Partial Class fMain
         Me.btnRegisterLibraries = New System.Windows.Forms.Button()
         Me.btnShowLibraries = New System.Windows.Forms.Button()
         Me.btnRunMapper = New System.Windows.Forms.Button()
+        Me.btnAbout = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'txtConsole
@@ -41,7 +42,7 @@ Partial Class fMain
         Me.txtConsole.ReadOnly = True
         Me.txtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both
         Me.txtConsole.Size = New System.Drawing.Size(714, 363)
-        Me.txtConsole.TabIndex = 2
+        Me.txtConsole.TabIndex = 4
         Me.txtConsole.WordWrap = False
         '
         'btnRegisterLibraries
@@ -49,33 +50,43 @@ Partial Class fMain
         Me.btnRegisterLibraries.Location = New System.Drawing.Point(12, 12)
         Me.btnRegisterLibraries.Name = "btnRegisterLibraries"
         Me.btnRegisterLibraries.Size = New System.Drawing.Size(120, 26)
-        Me.btnRegisterLibraries.TabIndex = 3
+        Me.btnRegisterLibraries.TabIndex = 0
         Me.btnRegisterLibraries.Text = "Register Libraries"
         Me.btnRegisterLibraries.UseVisualStyleBackColor = True
         '
         'btnShowLibraries
         '
-        Me.btnShowLibraries.Location = New System.Drawing.Point(148, 12)
+        Me.btnShowLibraries.Location = New System.Drawing.Point(162, 12)
         Me.btnShowLibraries.Name = "btnShowLibraries"
         Me.btnShowLibraries.Size = New System.Drawing.Size(120, 26)
-        Me.btnShowLibraries.TabIndex = 4
+        Me.btnShowLibraries.TabIndex = 1
         Me.btnShowLibraries.Text = "Show Libraries"
         Me.btnShowLibraries.UseVisualStyleBackColor = True
         '
         'btnRunMapper
         '
-        Me.btnRunMapper.Location = New System.Drawing.Point(284, 12)
+        Me.btnRunMapper.Location = New System.Drawing.Point(312, 12)
         Me.btnRunMapper.Name = "btnRunMapper"
         Me.btnRunMapper.Size = New System.Drawing.Size(120, 26)
-        Me.btnRunMapper.TabIndex = 5
+        Me.btnRunMapper.TabIndex = 2
         Me.btnRunMapper.Text = "Run Mapper"
         Me.btnRunMapper.UseVisualStyleBackColor = True
+        '
+        'btnAbout
+        '
+        Me.btnAbout.Location = New System.Drawing.Point(624, 12)
+        Me.btnAbout.Name = "btnAbout"
+        Me.btnAbout.Size = New System.Drawing.Size(102, 26)
+        Me.btnAbout.TabIndex = 3
+        Me.btnAbout.Text = "About"
+        Me.btnAbout.UseVisualStyleBackColor = True
         '
         'fMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(738, 438)
+        Me.Controls.Add(Me.btnAbout)
         Me.Controls.Add(Me.btnRunMapper)
         Me.Controls.Add(Me.btnShowLibraries)
         Me.Controls.Add(Me.btnRegisterLibraries)
@@ -92,4 +103,5 @@ Partial Class fMain
     Friend WithEvents btnRegisterLibraries As Button
     Friend WithEvents btnShowLibraries As Button
     Friend WithEvents btnRunMapper As Button
+    Friend WithEvents btnAbout As Button
 End Class
